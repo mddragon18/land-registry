@@ -7,15 +7,20 @@ contract LandRegistry is AccessControl {
     bytes32 public constant NOTARY_ROLE = keccak256("NOTARY_ROLE");
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
-    enum PropertyStatus { None, PendingRegistration, Registered, PendingTransfer }
+    enum PropertyStatus {
+        None,
+        PendingRegistration,
+        Registered,
+        PendingTransfer
+    }
 
     struct Request {
         uint256 propertyId;
-        address requester;    // who initiated request (owner or buyer)
+        address requester; // who initiated request (owner or buyer)
         address currentOwner; // snapshot of current owner at request time
         address pendingOwner; // new owner for transfer
-        string[] docCIDs;     // docs provided for this request (deed, tax, survey, etc)
-        bool docsApproved;    // set by notary
+        string[] docCIDs; // docs provided for this request (deed, tax, survey, etc)
+        bool docsApproved; // set by notary
         string paymentReceiptCID; // bank payment receipt (set by requester or registrar)
         uint256 requestedAt;
         uint256 docsApprovedAt;
@@ -28,7 +33,9 @@ contract LandRegistry is AccessControl {
     // property -> latest request
     mapping(uint256 => Request) public requests;
 
-    event RequestCreated(uint256 indexed propertyId, address indexed requester, address indexed pendingOwner, uint256 when);
+    event RequestCreated(
+        uint256 indexed propertyId, address indexed requester, address indexed pendingOwner, uint256 when
+    );
     event DocsApproved(uint256 indexed propertyId, address indexed notary, uint256 when);
     event PaymentRecorded(uint256 indexed propertyId, string paymentCid, uint256 when);
     event TransferFinalized(uint256 indexed propertyId, address indexed from, address indexed to, uint256 when);
@@ -60,11 +67,16 @@ contract LandRegistry is AccessControl {
     function requestRegistration(uint256 propertyId, string[] calldata docCIDs) external {
         require(owners[propertyId] == address(0), "Property already has an owner");
         Request storage r = requests[propertyId];
-        require(r.status == PropertyStatus.None || r.status == PropertyStatus.PendingRegistration, "Another request in progress");
+        require(
+            r.status == PropertyStatus.None || r.status == PropertyStatus.PendingRegistration,
+            "Another request in progress"
+        );
 
         // overwrite/initialize request
         delete r.docCIDs;
-        for (uint i = 0; i < docCIDs.length; i++) r.docCIDs.push(docCIDs[i]);
+        for (uint256 i = 0; i < docCIDs.length; i++) {
+            r.docCIDs.push(docCIDs[i]);
+        }
 
         r.propertyId = propertyId;
         r.requester = msg.sender;
@@ -117,7 +129,9 @@ contract LandRegistry is AccessControl {
 
         // reset and record docs
         delete r.docCIDs;
-        for (uint i = 0; i < docCIDs.length; i++) r.docCIDs.push(docCIDs[i]);
+        for (uint256 i = 0; i < docCIDs.length; i++) {
+            r.docCIDs.push(docCIDs[i]);
+        }
 
         r.propertyId = propertyId;
         r.requester = msg.sender;
@@ -145,7 +159,10 @@ contract LandRegistry is AccessControl {
 
     // Registrar records payment receipt (CID) and then finalizes transfer. Registrar must ensure receipt is valid off-chain.
     // This design assumes the bank payment is done off-chain and a receipt is uploaded to IPFS; registrar verifies it off-chain then calls this.
-    function recordPaymentAndFinalize(uint256 propertyId, string calldata paymentReceiptCID) external onlyRole(REGISTRAR_ROLE) {
+    function recordPaymentAndFinalize(uint256 propertyId, string calldata paymentReceiptCID)
+        external
+        onlyRole(REGISTRAR_ROLE)
+    {
         Request storage r = requests[propertyId];
         require(r.status == PropertyStatus.PendingTransfer, "No pending transfer");
         require(r.docsApproved, "Docs not approved yet");
@@ -166,19 +183,23 @@ contract LandRegistry is AccessControl {
     }
 
     // -------------------- Views / Helpers --------------------
-    function getRequest(uint256 propertyId) external view returns (
-        uint256 propertyIdOut,
-        address requester,
-        address currentOwner,
-        address pendingOwner,
-        string[] memory docCIDs,
-        bool docsApproved,
-        string memory paymentReceiptCID,
-        uint256 requestedAt,
-        uint256 docsApprovedAt,
-        uint256 finalizedAt,
-        PropertyStatus status
-    ) {
+    function getRequest(uint256 propertyId)
+        external
+        view
+        returns (
+            uint256 propertyIdOut,
+            address requester,
+            address currentOwner,
+            address pendingOwner,
+            string[] memory docCIDs,
+            bool docsApproved,
+            string memory paymentReceiptCID,
+            uint256 requestedAt,
+            uint256 docsApprovedAt,
+            uint256 finalizedAt,
+            PropertyStatus status
+        )
+    {
         Request storage r = requests[propertyId];
         return (
             r.propertyId,
