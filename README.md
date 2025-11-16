@@ -155,7 +155,7 @@ foundryup
 ### **2. Install Dependencies**
 
 ```
-forge install OpenZeppelin/openzeppelin-contracts
+forge install @OpenZeppelin/openzeppelin-contracts
 ```
 
 ### **3. Compile Contracts**
@@ -199,40 +199,7 @@ The smart contract never stores the file, only the hash (CID).
 
 ---
 
-## **Why This Design Is Realistic**
 
-This mimics real government processes:
-
-* Notaries only verify documents; they do *not* finalize transfers.
-* Registrars finalize transfers only after confirming payment (bank receipts).
-* Transfers cannot occur automatically; human verification is required at multiple steps.
-* Every action is logged and traceable permanently on-chain.
-* Documents can’t be faked because CIDs are immutable content-addressed hashes.
-
-This makes the system trustworthy while preserving real-world manual checks where they actually matter.
-
----
-
-## **Security Considerations**
-
-* Access control prevents unauthorized approvals.
-* All mutation actions require the proper role.
-* Payment receipts are only accepted from registrar after off-chain validation.
-* No on-chain payment handling avoids external financial integration complexity.
-* Events ensure full transparency for audits.
-
----
-
-## **Future Enhancements**
-
-* Multi-notary quorum approval
-* Escrow contract for on-chain payments
-* Dispute/encumbrance lock flags
-* Historical request tracking (multiple requests per property)
-* Zero-knowledge proofs for document redaction
-* Frontend dashboard for interacting with contract
-
----
 
 ## **Project Structure**
 
